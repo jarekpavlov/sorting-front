@@ -1,15 +1,27 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import "./styles/App.css"
 import MyButton from "./components/UI/buttons/MyButton";
-import MyInput from "./components/UI/inputs/MyInput";
 import axios from "axios";
+import Option from "./components/options/Option";
 
 
 const App = () => {
 
+    const optionAttributes = [
+        {value: 'list1', text: 'List 1'},
+        {value: 'list2', text: 'List 2'},
+        {value: 'list3', text: 'List 3'},
+        {value: 'list4', text: 'List 4'}]
     const [listName, setListName] = useState('')
     const [cardList, setCardList] = useState([])
     const [currentCard, setCurrentCard] = useState(null)
+    useEffect(()=> {
+        console.log('useEffect')
+        if (listName === ''){
+            setListName('list1')
+        }
+    }, [listName])
+
 
     function clickDownloadButton(e) {
         axios.get('http://localhost:8080/get-car-policy?parameter=' + listName)
@@ -48,20 +60,18 @@ const App = () => {
         e.preventDefault()
         e.target.style.background = 'lightblue'
     }
-
     function dragDropHandler(e, card) {
         e.preventDefault()
         setCardList(cardList.map(c => {
-            // if (card.order > currentCard.order && (c.order > currentCard.order)) {
-            //     return {...c, order: c.order-1}
-            // }
-            // if (card.order < currentCard.order && (c.order < currentCard.order)) {
-            //     return {...c, order: c.order+1}
-            // }
-            if (c.id === card.id) {
+            if (card.order > currentCard.order && (c.order > currentCard.order)) {
+                return {...c, order: c.order-1}
+            }else if (card.order < currentCard.order && (c.order < currentCard.order)) {
+                return {...c, order: c.order+1}
+            }
+            if (c.id === card.id && c.id !== currentCard.id) {
                 return {...c, order: currentCard.order}
             }
-            if (c.id === currentCard.id) {
+            if (c.id === currentCard.id && c.id !== card.id) {
                 return {...c, order: card.order}
             }
             return c
@@ -78,6 +88,13 @@ const App = () => {
     }
     return (
         <div className='app'>
+            <select id="select" onChange={e => setListName(e.target.value)}>
+                {optionAttributes.map((item, index) =>
+                    <Option key={index} value ={item.value}>{item.text}</Option>
+                )}
+            </select>
+            <MyButton onClick={e => clickDownloadButton(e)}>Download</MyButton>
+            <MyButton onClick={e => clickSendButton(e)}>Send new data</MyButton>
             {cardList.sort(sortCards).map((card) =>
                 <div key={card.id}
                      onDragStart={(e) => dragStartHandler(e, card)}
@@ -90,13 +107,6 @@ const App = () => {
                     {card.name}
                 </div>
             )}
-            <MyInput
-                value = {listName}
-                type="text"
-                placeholder="The name of the list"
-                onChange={e => setListName(e.target.value)}/>
-            <MyButton onClick={e => clickDownloadButton(e)}>Download</MyButton>
-            <MyButton onClick={e => clickSendButton(e)}>Send new data</MyButton>
         </div>
     )
 }
