@@ -1,8 +1,9 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import "./styles/App.css"
 import MyButton from "./components/UI/buttons/MyButton";
 import axios from "axios";
 import Option from "./components/options/Option";
+import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
 
 
 const App = () => {
@@ -12,26 +13,19 @@ const App = () => {
         {value: 'list2', text: 'List 2'},
         {value: 'list3', text: 'List 3'},
         {value: 'list4', text: 'List 4'}]
-    const [listName, setListName] = useState('')
+    const [listName, setListName] = useState('list1')
     const [cardList, setCardList] = useState([])
-    const [currentCard, setCurrentCard] = useState(null)
-    useEffect(()=> {
-        console.log('useEffect')
-        if (listName === ''){
-            setListName('list1')
-        }
-    }, [listName])
-
 
     function clickDownloadButton(e) {
         axios.get('http://localhost:8080/get-car-policy?parameter=' + listName)
             .then(res => {
+                console.log(res.data.carPolicyList)
                 let companyData = res.data.carPolicyList
-                console.log(companyData)
                 setCardList(companyData)
             })
             .catch(err => {
                 console.log(err);
+                alert('There is no connection to the endpoint.')
             })
     }
 
@@ -45,68 +39,62 @@ const App = () => {
             })
         }).then(() => {
             console.log('The data was sent')
+            alert('The data was sent successfully')
+        }).catch(() => {
+            alert('There is no connection to the endpoint.')
         })
     }
 
-    function dragStartHandler(e, card) {
-        setCurrentCard(card)
+    const reorder = (list, startIndex, endIndex) => {
+        const result = Array.from(list)
+        const [removed] = result.splice(startIndex, 1)
+        result.splice(endIndex, 0, removed)
+        console.log(result)
+        console.log(list)
+        return result
     }
-
-    function dragEndHandler(e) {
-        e.target.style.background = 'white'
-    }
-
-    function dragOverHandler(e) {
-        e.preventDefault()
-        e.target.style.background = 'lightblue'
-    }
-    function dragDropHandler(e, card) {
-        e.preventDefault()
-        setCardList(cardList.map(c => {
-            if (card.order > currentCard.order && (c.order > currentCard.order)) {
-                return {...c, order: c.order-1}
-            }else if (card.order < currentCard.order && (c.order < currentCard.order)) {
-                return {...c, order: c.order+1}
-            }
-            if (c.id === card.id && c.id !== currentCard.id) {
-                return {...c, order: currentCard.order}
-            }
-            if (c.id === currentCard.id && c.id !== card.id) {
-                return {...c, order: card.order}
-            }
-            return c
-        }))
-        e.target.style.background = 'white'
-    }
-
-    const sortCards = (a, b) => {
-        if (a.order > b.order) {
-            return 1
-        } else {
-            return -1
+    const onEnd = (result) => {
+        console.log(result)
+        if (result.destination !== null && result.source !== null) {
+            setCardList(reorder(cardList, result.source.index, result.destination.index))
         }
+
     }
     return (
         <div className='app'>
             <select id="select" onChange={e => setListName(e.target.value)}>
                 {optionAttributes.map((item, index) =>
-                    <Option key={index} value ={item.value}>{item.text}</Option>
+                    <Option key={index} value={item.value}>{item.text}</Option>
                 )}
             </select>
             <MyButton onClick={e => clickDownloadButton(e)}>Download</MyButton>
             <MyButton onClick={e => clickSendButton(e)}>Send new data</MyButton>
-            {cardList.sort(sortCards).map((card) =>
-                <div key={card.id}
-                     onDragStart={(e) => dragStartHandler(e, card)}
-                     onDragLeave={(e) => dragEndHandler(e)}
-                     onDragEnd={(e) => dragEndHandler(e)}
-                     onDragOver={(e) => dragOverHandler(e)}
-                     onDrop={(e) => dragDropHandler(e, card)}
-                     draggable={true}
-                     className={'card'}>
-                    {card.name}
-                </div>
-            )}
+            <h5>Draggable list of items: </h5>
+            <DragDropContext onDragEnd={onEnd}>
+                <Droppable droppableId='droppableTag'>
+                    {(provided, snapshot) => (
+                        <div ref={provided.innerRef}>
+                            {cardList.map((item, index) => (
+                                <Draggable
+                                    draggableId={item.id}
+                                    key={item.id}
+                                    index={index}>
+                                    {(provided, snapshot) => (
+                                        <div
+                                            ref={provided.innerRef}
+                                            {...provided.draggableProps}
+                                            {...provided.dragHandleProps}>
+                                            <div className="drag-item">{item.name}</div>
+                                        </div>
+                                    )}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                        </div>
+                    )
+                    }
+                </Droppable>
+            </DragDropContext>
         </div>
     )
 }
