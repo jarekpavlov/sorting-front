@@ -4,8 +4,8 @@ export default class DataService {
     static getList(listName, setCardList) {
         axios.get('http://localhost:8080/get-car-policy?parameter=' + listName)
             .then(res => {
-                console.log(res.data.carPolicyList)
-                let companyData = res.data.carPolicyList
+                console.log(res.data)
+                let companyData = res.data
                 setCardList(companyData)
             })
             .catch(err => {

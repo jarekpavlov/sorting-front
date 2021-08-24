@@ -9,11 +9,11 @@ import Select from "./components/UI/select/Select";
 const App = () => {
 
     const optionAttributes = [
-        {value: 'list1', text: 'List 1'},
-        {value: 'list2', text: 'List 2'},
-        {value: 'list3', text: 'List 3'},
-        {value: 'list4', text: 'List 4'}]
-    const [listName, setListName] = useState('list1')
+        {value: 'EQS', text: 'EQS'},
+        {value: 'C123', text: 'C123'},
+        {value: 'A123', text: 'A123'},
+        {value: 'G', text: 'G'}]
+    const [listName, setListName] = useState('EQS')
     const [cardList, setCardList] = useState([])
 
     const downloadData = () => {

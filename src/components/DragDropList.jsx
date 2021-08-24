@@ -16,8 +16,8 @@ const DragDropList = ({cardList, setCardList}) => {
                     <div ref={provided.innerRef}>
                         {cardList.map((item, index) => (
                             <Draggable
-                                draggableId={item.id}
-                                key={item.id}
+                                draggableId={item.code}
+                                key={item.code}
                                 index={index}>
                                 {(provided, snapshot) => (
                                     <div
