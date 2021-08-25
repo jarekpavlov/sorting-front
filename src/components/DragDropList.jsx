@@ -1,6 +1,6 @@
 import React from 'react';
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd";
-import {arrayReorder} from "../utils/ArrayReorder";
+import {arrayReorder} from "../utils/ArrayProcessing";
 
 const DragDropList = ({cardList, setCardList}) => {
     const onEnd = (result) => {

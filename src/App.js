@@ -1,9 +1,9 @@
 import {useState} from "react";
 import "./styles/App.css"
-import MyButton from "./components/UI/buttons/MyButton";
+import MyButton from "./components/ui/buttons/MyButton";
 import DragDropList from "./components/DragDropList";
-import DataService from "./API/DataService";
-import Select from "./components/UI/select/Select";
+import Select from "./components/ui/select/Select";
+import {getList, setList} from "./api/DataService";
 
 
 const App = () => {
@@ -17,11 +17,11 @@ const App = () => {
     const [cardList, setCardList] = useState([])
 
     const downloadData = () => {
-        DataService.getList(listName, setCardList)
+        getList(listName, setCardList)
     }
 
     const sendData = () => {
-        DataService.setList(listName, cardList)
+        setList(listName, cardList)
     }
 
     return (
